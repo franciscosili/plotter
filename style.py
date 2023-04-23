@@ -572,7 +572,7 @@ plots_conf = {
 
     'lph_iso': plot_conf(
         varname = 'lph_iso',
-        xtitle = 'Loose photon E_{T}^{cone20} - 0.022 #times  p_{T} [GeV]',
+        xtitle = 'Loose photon E_{T}^{iso} [GeV]',
         ytitle = 'Events / BIN GeV',
         legpos = 'right',
         xmin = None,
@@ -585,7 +585,7 @@ plots_conf = {
 
     'lph_iso[0]': plot_conf(
         varname = 'lph_iso[0]',
-        xtitle = 'Leading loose photon E_{T}^{iso} - 0.022 #times  p_{T} [GeV]',
+        xtitle = 'Leading loose photon E_{T}^{iso} [GeV]',
         ytitle = 'Events / BIN GeV',
         legpos = 'right',
         xmin = None,
