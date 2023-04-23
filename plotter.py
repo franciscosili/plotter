@@ -228,42 +228,69 @@ def overlapped_yrange(chist, minimum_labels, plotted_objs, use_error=False) -> N
     # check if we are using logscale
     logy = RT.gPad.GetLogy()
 
+
+
+
+
     # get the maximum of the plotted objects and its location
     plotted_maxs = []
+    plotted_mins = []
 
 
     for obj in plotted_objs:
+        min_val = float('inf')
         max_val = 0
         max_loc = -1
+        min_loc = -1
         if obj.InheritsFrom('TH1'):
             for this_bin in range(1, obj.GetNbinsX()+1):
                 tmp_max = obj.GetBinContent(this_bin)
-                tmp_err = obj.GetBinErrorUp(this_bin)
+                tmp_min = obj.GetBinContent(this_bin)
+                tmp_err_up = obj.GetBinErrorUp(this_bin)
+                tmp_err_dw = obj.GetBinErrorLow(this_bin)
                 if use_error:
-                    tmp_max += tmp_err
+                    tmp_max += tmp_err_up
+                    tmp_min -= tmp_err_dw
                 if tmp_max > max_val:
-                    max_val    = tmp_max
+                    max_val = tmp_max
                     max_loc = this_bin
+                if tmp_min < min_val:
+                    min_val = tmp_min
+                    min_loc = this_bin
             
             plotted_maxs.append((max_val,
                                  obj.GetBinLowEdge(max_loc),
                                  obj.GetBinLowEdge(max_loc) + obj.GetBinWidth(max_loc)))
+            plotted_mins.append((min_val,
+                                 obj.GetBinLowEdge(min_loc),
+                                 obj.GetBinLowEdge(min_loc) + obj.GetBinWidth(min_loc)))
 
         elif obj.InheritsFrom('TGraph'):
             num = obj.GetN()
             for this_point in range(0, num):
                 tmp_max = obj.GetPointY(this_point) + obj.GetErrorYhigh(this_point)
+                tmp_min = obj.GetPointY(this_point) - obj.GetErrorYlow(this_point)
                 if tmp_max > max_val:
                     max_val = tmp_max
                     max_loc = this_point
+                if tmp_min < min_val:
+                    min_val = tmp_min
+                    min_loc = this_point
                 
             point_xmin = obj.GetPointX(max_loc) - obj.GetErrorXlow(max_loc)
             point_xmax = obj.GetPointX(max_loc) + obj.GetErrorXhigh(max_loc)
             plotted_maxs.append((point_xmin, point_xmax, max_val))
+            plotted_mins.append((point_xmin, point_xmax, min_val))
 
     max_object_values = max(plotted_maxs, key= lambda x: x[0])[0]
+    min_object_values = min(plotted_mins, key= lambda x: x[0])[0]
 
     chist.SetMaximum(max_object_values)
+
+    if logy:
+        chist.SetMinimum(0.01*min_object_values)
+    else:
+        chist.SetMinimum(0.6*min_object_values)
 
     def is_overlapped() -> bool:
         RT.gPad.Modified()
